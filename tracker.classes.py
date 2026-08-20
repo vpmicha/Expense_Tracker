@@ -1,3 +1,18 @@
+import json
+
+def main():
+    add_expenses = add_expenses()
+
+def add_expenses():
+    while True:
+        name_of_full_expense = input('What would you like to name the full expense? ').title().strip()
+        if name_of_full_expense == '':
+            continue
+        else:
+            name_of_full_expense = Tracker()
+            
+
+
 class Tracker():
     def __init__(self):
         self.full_expsense = {}
@@ -22,7 +37,7 @@ class Tracker():
         #---------------------Get the expense's cost---------------------#
         while True:
             try:
-                cost = f'{float(input("What is the expense's cost? ")):2f}'
+                cost = f'{float(input("What is the expense's cost? ")):.2f}'
                 if cost == '':
                     continue
                 else:
@@ -48,7 +63,5 @@ class Tracker():
 
     def __str__(self):
         return self.full_expsense
-
-    
 
             
