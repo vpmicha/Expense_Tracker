@@ -1,8 +1,8 @@
 import json
 
 def main():
-    add_expenses = add_expenses()
-    save_expenses = save_expenses(add_expenses)
+    add_expensesV = add_expenses()
+    save_expensesV = save_expenses(add_expensesV)
 
 def add_expenses():
     while True:
@@ -10,7 +10,7 @@ def add_expenses():
         if name_of_full_expense == '':
             continue
         else:
-            name_of_full_expense = Tracker()
+            tracker = Tracker()
             break
     while True:
         name = input("What is the expense's name? ").strip().title()
@@ -20,7 +20,7 @@ def add_expenses():
             break
     while True:
         try:
-            cost = f'{float(input("What is the expense's cost? ")):.2f}'
+            cost = round(float(input("What is the expense's cost? ")), 2)
             if cost == '':
                 continue
             else:
@@ -35,7 +35,7 @@ def add_expenses():
         else:
             break
     
-    return name_of_full_expense.add_expense(name, cost, description)
+    return {name_of_full_expense: tracker.add_expense(name, cost, description)}
 
 def save_expenses(expenses):
     try:
@@ -65,6 +65,6 @@ class Tracker():
             del self.full_expsense
 
     def __str__(self):
-        return self.full_expsense
+        return str(self.full_expsense)
 
             
