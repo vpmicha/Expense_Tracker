@@ -2,6 +2,7 @@ import json
 
 def main():
     add_expenses = add_expenses()
+    save_expenses = save_expenses(add_expenses)
 
 def add_expenses():
     while True:
@@ -10,7 +11,40 @@ def add_expenses():
             continue
         else:
             name_of_full_expense = Tracker()
-            
+            break
+    while True:
+        name = input("What is the expense's name? ").strip().title()
+        if name == '':
+             continue
+        else:
+            break
+    while True:
+        try:
+            cost = f'{float(input("What is the expense's cost? ")):.2f}'
+            if cost == '':
+                continue
+            else:
+                break
+        except (ValueError, KeyError):
+            continue        
+    while True:
+        description = input("What is the expense's description? ").strip()
+        if len(description) > 60:
+            print('Description must be smaller in size.(Less than 60 characters)')
+            continue
+        else:
+            break
+    
+    return name_of_full_expense.add_expense(name, cost, description)
+
+def save_expenses(expenses):
+    try:
+        with open('Expenses.json', 'a') as file:
+            json.dump(expenses, file)
+    except (OSError, KeyError):
+        print('Sorry! Programm could not save your expenses.')
+
+    
 
 
 class Tracker():
@@ -21,40 +55,9 @@ class Tracker():
         self.name = name
         self.cost = cost
         self.description = description
-
-        #---------------------Get the expense's name---------------------#
-        while True:
-            try:
-                name = input("What is the expense's name? ").strip().title()
-                if name == '':
-                    continue
-                else:
-                    self.full_expsense['Name'] = name
-                    break
-            except KeyError:
-                continue
-
-        #---------------------Get the expense's cost---------------------#
-        while True:
-            try:
-                cost = f'{float(input("What is the expense's cost? ")):.2f}'
-                if cost == '':
-                    continue
-                else:
-                    self.full_expsense['Cost'] = cost
-                    break
-            except (ValueError, KeyError):
-                continue        
-
-        #---------------------Get the expense's description---------------------#
-        while True:
-            description = input("What is the expense's description? ").strip()
-            if len(description) > 60:
-                print('Description must be smaller in size.(Less than 60 characters)')
-                continue
-            else:
-                self.full_expsense['Description'] = description
-                break
+        self.full_expsense['Name'] = name
+        self.full_expsense['Cost'] = cost
+        self.full_expsense['Description'] = description
 
         return self.full_expsense
 
