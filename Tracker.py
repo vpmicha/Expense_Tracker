@@ -172,3 +172,6 @@ class Tracker():
         self.full_expsense['Description'] = description
 
         return self.full_expsense
+    
+if __name__ == '__main__':
+    main()
