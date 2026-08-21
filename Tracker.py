@@ -1,53 +1,70 @@
 import json
-import os
-from typing import Type
 from sum_List_largest_number import add_contents, largest_number
-from math import inf
 import sys
 
 def main():
 #In the end of each variable V is short for Variable and L is short for List.
+    not_saved_expensesL = []
+    name_of_full_expenseL = []
     try:
         past_expenses = load_expenses()
         while True:
-                if past_expenses != None:
+                if past_expenses and past_expenses != 'No past expense':
                     if input('Do you want to see your expenses?(Y:Yes/N:No) ').strip().lower() == 'y':
                         print(load_expenses())
                         break
+                    break
+                break
         while True:
             ask = input('Do you want to add or remove an expense? ').strip().lower()
             if ask == 'add':
                 while True:
-                    add_expensesV = add_expenses()
+                    name_of_full_expense, not_saved_expenses = add_expenses()
+                    name_of_full_expenseL.append(name_of_full_expense)
+                    not_saved_expensesL.append(not_saved_expenses)                   
                     more_addition = input('Do you want to add more?(Y:Yes/N:No) ').strip().lower()
                     if more_addition == 'y':
                         continue
                     elif more_addition == 'n':
-                        save_expenses(add_expensesV)                        
+                        save_expenses(not_saved_expensesL, name_of_full_expenseL)                        
                         break
-                    break                    
+                    break   
+                past_expenses = load_expenses()                 
             elif ask == 'remove':
                 while True:
                     removeE = input('What expense do you want to remove? ').strip().title()
-                    remove_expensesV = remove_expenses(removeE)
+                    remove_expenses(removeE)
                     more_removal = input('Do you want to remove more?(Y:Yes/N:No) ').strip().lower()
                     if more_removal == 'y':
                         continue
                     elif more_removal == 'n':
-                        save_expenses(remove_expensesV)
                         break
                     break
+                past_expenses = load_expenses()
             else:
                 continue
 
             try:
-                if past_expenses:
-                    if input('Do you want to see your total expenses?(Y:Yes/N:No) ').strip().lower():
-                        print(total_spending(past_expenses)[0])
-                    elif input('Do you want to see your largest expense?(Y:Yes/N:No) ').strip().lower():      
-                        total_spendingL = total_spending(past_expenses)[1]
-                        print(largest_expenseV = largest_expense(total_spendingL))
-                else:
+                if past_expenses and past_expenses != 'No past expense':
+                    while True:
+                        total_expenses = input('Do you want to see your total expenses?(Y:Yes/N:No) ').strip().lower()
+                        if total_expenses == 'y':
+                            print(total_spending(past_expenses)[0])
+                            break
+                        elif total_expenses == 'n':
+                            break
+                    while True:
+                        biggest_spend = input('Do you want to see your largest expense?(Y:Yes/N:No) ').strip().lower()
+                        if biggest_spend == 'y':
+                            total_spendingL = total_spending(past_expenses)[1]
+                            for key, value in past_expenses.items():
+                                if value['Cost'] == largest_expense(total_spendingL):
+                                    print(f'{key}: ${largest_expense(total_spendingL)}')
+                                    break
+                            break
+                        elif biggest_spend == 'n':      
+                            break
+                elif past_expenses == 'No past expense' or past_expenses == {}:
                     print('You have no past expenses to see!')
 
             except (KeyError, ValueError, IndexError, TypeError, OSError):
@@ -72,7 +89,7 @@ def add_expenses():
     while True:
         try:
             cost = round(float(input("What is the expense's cost? ")), 2)
-            if cost == '':
+            if cost <= 0:
                 continue
             else:
                 break
@@ -86,7 +103,7 @@ def add_expenses():
         else:
             break
     
-    return {name_of_full_expense: tracker.add_expense(name, cost, description)}
+    return [name_of_full_expense, tracker.add_expense(name, cost, description)]
 
 def remove_expenses(expenses):
     try:
@@ -95,16 +112,31 @@ def remove_expenses(expenses):
             del data[expenses]
         with open('Expenses.json', 'w') as file:
             json.dump(data, file)
-    except (json.JSONDecodeError, OSError, FileNotFoundError):
-        return 'You have to expenses to remove!'
+    except (json.JSONDecodeError, OSError, FileNotFoundError, KeyError):
+        return 'You have no expenses to remove!'
     return data
 
-def save_expenses(expenses):
+def save_expenses(not_saved_expensesL, name_of_full_expenseL):
     try:
-        with open('Expenses.json', 'a') as file:
-            json.dump(expenses, file)
-    except (OSError, KeyError, FileNotFoundError, json.JSONDecodeError):
-        print('Sorry! Programm could not save your expenses.')
+        with open('Expenses.json', 'r') as file:
+            data = json.load(file)
+            for expense, expense_name in zip(not_saved_expensesL, name_of_full_expenseL):
+                data[expense_name] = expense
+
+        with open('Expenses.json', 'w') as file:
+            json.dump(data, file)
+            not_saved_expensesL.clear()
+            name_of_full_expenseL.clear()
+    except (KeyError, FileNotFoundError, json.JSONDecodeError):
+        data = {}
+        with open('Expenses.json', 'w') as file:
+            for expense, expense_name in zip(not_saved_expensesL, name_of_full_expenseL):
+                data[expense_name] = expense
+            json.dump(data, file)
+            not_saved_expensesL.clear()
+            name_of_full_expenseL.clear()
+    except OSError:
+        print('Sorry, programm could not save your expenses!')
 
 def total_spending(past_expenses):
     total_spendingL = []
@@ -124,7 +156,7 @@ def load_expenses():
             return json.load(file)
     
     except (OSError, FileNotFoundError, json.JSONDecodeError):
-        return None
+        return 'No past expense'
 
 
 class Tracker():
@@ -140,11 +172,3 @@ class Tracker():
         self.full_expsense['Description'] = description
 
         return self.full_expsense
-
-    def remove_expense(self):
-            del self.full_expsense
-
-    def __str__(self):
-        return str(self.full_expsense)
-
-            
